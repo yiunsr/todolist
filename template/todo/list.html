@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}유저리스트{% endblock %}
+
+{% block head %}
+<!-- <link rel="stylesheet" type="text/css" href="/static/css/buttons.dataTables.min.css"> -->
+<link rel="stylesheet" type="text/css" href="/static/css/select.dataTables.min.css"> 
+{% endblock %}
+
+{% block content %}
+
+<div class="app-title">
+	<div>
+		<h1>
+			<i class="fa fa-th-list"></i> 사용자 리스트
+		</h1>
+		<p>가입한 사용자 정보</p>
+	</div>
+	<ul class="app-breadcrumb breadcrumb side">
+		<li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+		<li class="breadcrumb-item">사용자 리스트</li>
+	</ul>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="tile">
+			<div class="tile-body">
+				<table class="table table-hover table-bordered" id="listTable">
+					<thead>
+						<tr>
+							<th></th>
+							<th>id</th>
+							<th>email</th>
+							<th>가입일</th>
+							<th>마지막로그인</th>
+						</tr>
+					</thead>
+					<tbody>
+						
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<form id="userAddForm" class="form-horizontal">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">사용자 추가</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+	      		</div>
+	      		
+	      		<div class="modal-body">
+					<div class="form-group row">
+						<label class="control-label col-md-3">email</label>
+						<div class="col-md-8">
+							<input class="form-control" type="email" name="email" required placeholder=""email"">
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<label class="control-label col-md-3">password</label>
+						<div class="col-md-8">
+							<input class="form-control" type="password" name="password"  required placeholder=""password"">
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<label class="control-label col-md-3">repassword</label>
+						<div class="col-md-8">
+							<input class="form-control" type="password" name="repassword"  required placeholder=""repassword"">
+						</div>
+					</div>
+					
+      			</div>
+      		
+	      		<div class="modal-footer">
+	      			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      			<button type="submit" class="btn btn-primary">사용자 추가</button>
+	      		</div>
+      		</form>
+      	</div>
+	</div>
+</div>
+
+{% endblock %}
+
+ 
+{% block script %} 
+<!-- Data table plugin-->
+<script type="text/javascript" src="/static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/dataTables.bootstrap.min.js"></script>
+
+<!--  사용자추가기능 같은 버튼 표시 -->
+<script type="text/javascript" src="/static/js/plugins/dataTables.buttons.min.js"></script>
+
+<!--  체크박스 구현기능 -->
+<script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>
+<script type="text/javascript">
+
+$('#listTable').DataTable({
+	"processing": true,
+	"serverSide": true,
+	"dom": "B<>lfrtip",
+	
+	"ajax": {
+		"url": "/rest/account/tablelist",
+		"type": "GET",
+		"data": function ( data ) {
+			data.col_len = data.columns.length;
+			data.ord_col_len = data.order.length;
+			return data;
+         },
+     },
+     "rowId": 'id',
+     "order": [[ 1, "desc" ]],
+     "columns": [
+    	{ "data": "id", orderable: false, className: 'select-checkbox', targets:   0 },
+		{ "data": "id" },
+        { "data": "email" },
+        { "data": "date_joined" },
+        { "data": "last_login" },
+	],
+	
+	"select": {
+		style: 'multi',
+        selector: 'td:first-child'
+    },
+    "DT_RowId" : "id",
+    "rowCallback": function( row, data, index ) {
+    	//// 체크박스가 표시 될 수 있도록 화면을 비운다. 
+        $('td:eq(0)', row).html('');
+    },
+	"buttons": [
+        {
+            text: '사용자 추가',
+            action: function ( e, dt, node, config ) {
+            	$("#addUserModal").modal('show');
+                //dt.ajax.reload();
+                
+                // 사용자 추가시
+            	$( "#userAddForm" ).submit(function( event ) {
+                    event.preventDefault();
+                    
+                    var param = $("#userAddForm [name]").getParam();
+                    if(param["password"] != param["repassword"]){
+                    	$.alert("form error","password와 repassword 가 일치하지 않습니다.");
+                    	return;
+                    }
+                    
+                    $("#addUserModal").modal('hide');
+                    jQuery.request("POST", "/rest/account/", param, function(success, httpStatus, data){
+                    	if(!success){
+                    		$.alert("사용자 추가실패", data["message"]);
+                    		return; 
+                      	 }
+                        
+                      $.alert("사용자 추가", "사용자 추가를 완료했습니다.", function(){
+                    	  dt.ajax.reload();
+                      });
+                      
+                    });
+                    
+                  });
+            }
+        },
+        {
+            text: '사용자 삭제',
+            action: function ( e, dt, node, config ) {
+            	var selectedRows = dt.rows({ selected: true }).ids();
+            	if( selectedRows.length == 0 ){
+            		$.alert("사용자 삭제", "삭제할 사용자를 선택해주세요.");
+            		return;
+            	}
+            	var ids = [];
+            	for(index = 0; index < selectedRows.length; index++) {
+            		ids.push( selectedRows[index] );
+            	}
+            	jQuery.request("DELETE", "/rest/account/deletelist", {ids : ids}, function(success, httpStatus, data){
+                	if(!success){
+                		$.alert("사용자 삭제 실패", data["message"]);
+                		return; 
+                  	}
+					$.alert("사용자 삭제", "삭제완료 ", function(){
+						dt.ajax.reload();
+					});
+				});
+            }
+        }
+    ]
+});
+
+</script>
+ {% endblock %}

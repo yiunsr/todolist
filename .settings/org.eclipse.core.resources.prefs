@@ -9,4 +9,5 @@ encoding//todolist/temlate_context.py=utf-8
 encoding//todolist/view.py=utf-8
 encoding//todolist/wsgi.py=utf-8
 encoding//todolist/wsgi_real.py=utf-8
+encoding//todos/urls.py=utf-8
 encoding//util/utils.py=utf-8

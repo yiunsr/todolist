@@ -44,6 +44,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """
+    Djanog User model 에 대한 재정의
+    """
     email = models.EmailField(
         verbose_name=_('Email address'),
         max_length=30,
