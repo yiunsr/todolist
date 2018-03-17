@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+encoding//accounts/models.py=utf-8
+encoding//accounts/urls.py=utf-8
+encoding//todolist/ErrClass.py=utf-8
+encoding//todolist/__init__.py=utf-8
+encoding//todolist/serializerField.py=utf-8
+encoding//todolist/settings.py=utf-8
+encoding//todolist/temlate_context.py=utf-8
+encoding//todolist/view.py=utf-8
+encoding//todolist/wsgi.py=utf-8
+encoding//todolist/wsgi_real.py=utf-8
+encoding//util/utils.py=utf-8
