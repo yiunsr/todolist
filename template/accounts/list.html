@@ -183,7 +183,7 @@ $('#listTable').DataTable({
             	for(index = 0; index < selectedRows.length; index++) {
             		ids.push( selectedRows[index] );
             	}
-            	jQuery.request("DELETE", "/rest/account/deletelist", {ids : ids}, function(success, httpStatus, data){
+            	jQuery.request("POST", "/rest/account/deletelist/", {ids : ids}, function(success, httpStatus, data){
                 	if(!success){
                 		$.alert("사용자 삭제 실패", data["message"]);
                 		return; 

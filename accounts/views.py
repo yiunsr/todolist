@@ -66,10 +66,10 @@ class UserViewSet(viewsets.ModelViewSet):
         result = ErrClass('NOERROR').toDict()
         return HttpResponse(json.dumps(result), content_type="application/json")
     
-    @list_route(methods=['DELETE'])
+    @list_route(methods=['POST'])
     def deletelist(self, request):
         """
-        HTTP DELETE Method 를 사용하고  deletelist 라는 path
+        HTTP POST Method 를 사용하고  deletelist 라는 path
         email 과 password 를 이용해서 user 를 생성한다.
         
         ids[] : 삭제하고 싶 
@@ -163,7 +163,7 @@ def _login(request):
                 login(request, user)
                 result = ErrClass('NOERROR').toDict()
                 result['user_index'] = user.pk
-                result['email'] =  user.username
+                result['email'] =  user.email
                 if next:
                     result['redirect_url'] = next
                 else:
