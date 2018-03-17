@@ -4,8 +4,9 @@ import traceback
 
 from django.template.response import TemplateResponse
 from django.template.context_processors import csrf
-from django.contrib.auth import authenticate, login
-from django.http.response import HttpResponse,  HttpResponseNotFound
+from django.contrib.auth import authenticate, login, logout
+from django.http.response import HttpResponse,  HttpResponseNotFound,\
+    HttpResponseRedirect
 from django.db.utils import IntegrityError
 
 from rest_framework import viewsets, status
@@ -149,7 +150,10 @@ def _login(request):
         logger.error(traceback.format_exc() )
         return ErrClass('UNKNWON_ERROR').response()
 
-
+def _logout(request):
+    logout(request)
+    return HttpResponseRedirect("/")
+        
 
 def signup(request):
     try: 
