@@ -29,6 +29,7 @@ urlpatterns = [
     
     url(r'^rest/', include(router.urls)),
     path('account/', include('accounts.urls')),
+    path('todo/', include('todos.urls')),
     path('sample', view.sample),
     path('', view.main),
 ]

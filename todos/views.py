@@ -8,10 +8,10 @@ logger = logging.getLogger('django_log')
 
 def _list(request):
     try: 
-        logger.info("/account/list")
+        logger.info("/todos/list")
         c = {}
         c.update(csrf(request))
-        response = TemplateResponse(request, 'accounts/list.html', c )
+        response = TemplateResponse(request, 'todos/list.html', c )
         response.render()
         return response
     
