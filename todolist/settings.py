@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from todolist import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+from todolist import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT,\
+    SERVER_TYPE
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
     'todos',
     'accounts'
 ]
@@ -175,3 +178,16 @@ LOGGING = {
         }
     }
 }
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES' : ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination', 
+    'PAGE_SIZE': 100,
+    'UNICODE_JSON' : True, 
+}
+
+REST_FRAMEWORK[ 'DEFAULT_RENDERER_CLASSES' ] = (   'rest_framework.renderers.JSONRenderer', 'rest_framework.renderers.BrowsableAPIRenderer', )
+if SERVER_TYPE in [ "REAL" ]  :
+    REST_FRAMEWORK[ 'DEFAULT_RENDERER_CLASSES' ] = ( 'rest_framework.renderers.JSONRenderer', ) 
+
