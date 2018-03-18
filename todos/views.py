@@ -12,6 +12,9 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import list_route
 import json
 from django.http.response import HttpResponse
+import csv
+import openpyxl
+from openpyxl.writer.excel import save_virtual_workbook
 
 
 logger = logging.getLogger('django_log')
@@ -106,13 +109,32 @@ def _list(request):
     
 @login_required
 def export(request):
-    try: 
-        logger.info("/todos/list")
-        c = {}
-        c.update(csrf(request))
-        response = TemplateResponse(request, 'todos/list.html', c )
-        response.render()
-        return response
+    try:
+        filetype = request.GET.get("filetype")
+        jsonDataString = request.GET.get("jsonData")
+        jsonDataList = json.loads(jsonDataString)
+        if filetype == "csv":
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="todolist.csv"'
+
+            # id, priority, text, create_time, done
+            writer = csv.writer(response)
+            for item in jsonDataList:
+                writer.writerow([item["id"], item["priority"], item["text"], item["create_time"], item["done"]] )
+            return response
+        elif filetype =="excel":
+            wb = openpyxl.Workbook()
+            worksheet = wb.active
+            for item in jsonDataList:
+                worksheet.append([item["id"], item["priority"], item["text"], item["create_time"], item["done"]])
+            response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="todolist.xls"'
+            return response
+        elif filetype =="json":
+            response = HttpResponse( content = jsonDataString, content_type='application/json')
+            response['Content-Disposition'] = 'attachment; filename="todolist.json"'
+            return response
+        return ErrClass('UNKNWON_ERROR').response()
     
     except Exception as e:
         logger.error(traceback.format_exc() )
