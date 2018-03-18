@@ -26,6 +26,7 @@ from accounts.serializers import UserSerializer
 import django_filters
 from rest_framework.decorators import list_route
 from util.utils import JSONResponse
+from django.contrib.auth.decorators import user_passes_test
 
 logger = logging.getLogger('django_log')
 
@@ -216,7 +217,8 @@ def signup(request):
     except Exception as e:
         logger.error(traceback.format_exc() )
         return ErrClass('UNKNWON_ERROR').response()
-    
+
+@user_passes_test(lambda u: u.is_superuser)
 def _list(request):
     try: 
         logger.info("/account/list")

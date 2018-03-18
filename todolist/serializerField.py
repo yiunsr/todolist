@@ -13,8 +13,11 @@ class DateTimeTzLocalField(serializers.DateTimeField):
     def to_native(self, value):
         # 2017-12-31 10:00:00 형태
         if isinstance( value, datetime.datetime):
-            value = timezone.localtime(value)
-            return value.strftime(self.format)
+            if self.format == "unixtimestamp":
+                return int(value.replace(tzinfo=timezone.utc).timestamp())
+            else:
+                value = timezone.localtime(value)
+                return value.strftime(self.format)
         
         # 2017-12-31 형태
         elif isinstance( value, datetime.date):

@@ -19,3 +19,6 @@ class Todo(models.Model):
     modify_time = models.DateTimeField(auto_now = True, null=True)
     
     user = models.ForeignKey(User, related_name="todo_user" , on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.text

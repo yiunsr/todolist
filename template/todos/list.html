@@ -32,7 +32,7 @@
 						<div class="col-md-2 col-sm-2">
 						</div>
 						<div class="col-md-3 col-sm-3 col-3">
-							<button class="btn btn-warning" type="button">Save</button>
+							<button class="btn btn-warning" type="button" onclick="saveItem();">Save</button>
 						</div>
 						<div class="col-md-3 col-sm-3 col-4">
 							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
@@ -151,6 +151,8 @@
 <script type="text/javascript" src="/static/js/plugins/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/js/plugins/dataTables.bootstrap.min.js"></script>
 
+<!-- 자바스크립트 utility library(리스트, Dict 관리) -->
+<script type="text/javascript" src="/static/js/lodash.min.js"></script>
 
 <!--  체크박스 구현기능 -->
 <!-- <script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>  -->
@@ -198,7 +200,7 @@ $( "#todoForm" ).submit(function( event ) {
 	this.reset();
 	// listTableTodo,  listTableDone
 	listTableTodo.row.add({
-		id : id_index, priority : "2", text : param["text"], create_time : Date.now(), done : 0
+		id : id_index, priority : "2", text : param["text"], create_time : Date.now(), done : false
 	}).draw( false );
 	id_index += 1;
 });
@@ -214,7 +216,7 @@ function delItem(event, tableType ){
 function doneItem(event, tableType ){
 	// todo 테이블의 row 를 데이터를 가져와서 done 테이블에 넣어준다. 
 	var rowData = listTableTodo.row( $(event.target).parents("tr") ).data();
-	rowData["done"] = 1;
+	rowData["done"] = true;
 	listTableDone.row.add(rowData).draw( false );
 	
 	// todo 테이블의 row 삭제
@@ -224,7 +226,7 @@ function doneItem(event, tableType ){
 function todoItem(event, tableType ){
 	// done 테이블의 row 를 데이터를 가져와서 todo 테이블에 넣어준다. 
 	var rowData = listTableDone.row( $(event.target).parents("tr") ).data();
-	rowData["done"] = 0;
+	rowData["done"] = false;
 	listTableTodo.row.add(rowData).draw( false );
 	
 	// done 테이블의 row 삭제
@@ -239,6 +241,29 @@ function priorityChange(event, tableType){
 	dataTableList.row( $(event.target).parents("tr") ).data(rowData).draw();
 }
 
+function saveItem(){
+	//var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
+	var todoItemList = listTableTodo.data();
+	var doenItemList = listTableDone.data();
+	var jsonDataList = [];
+	for(var index = 0; index < todoItemList.length ; index++){
+		jsonDataList.push( todoItemList[index]);
+	}
+	for(var index = 0; index < doenItemList.length ; index++){
+		jsonDataList.push( doenItemList[index]);
+	}
+	$.request("POST", "/rest/todo/save/", { jsonData : JSON.stringify(jsonDataList)} , function(success, httpStatus, data){
+        if(!success){
+            if(data["message"]){
+                $.confirm("Login Error", data["message"]);
+            }
+            $.reload();
+        }
+        $.confirm("Save", "저장이 완료되었습니다. " );
+      });
+
+}
+
 var dataTableColumn =  [
 	{ "data": "id", "visible": false, },
 	{ "data": "create_time", "visible": false, },
@@ -247,65 +272,84 @@ var dataTableColumn =  [
     { "data": "done", "visible": false, },
     { "data": "id", "className" : "action" , "orderable": false, },
 ];
+var listTableTodo;
+var listTableDone
 
-var listTableTodo = $('#listTableTodo').DataTable({
-	"processing": true,
-	"serverSide": false,
-	"dom": "rtip",
+function initTable(){
+	listTableTodo = $('#listTableTodo').DataTable({
+		"processing": true,
+		"serverSide": false,
+		"dom": "rtip",
+	     "rowId": 'id',
+	     "order": [[ 0, "desc" ]],
+	     "columns": dataTableColumn,
+	    "DT_RowId" : "id",
+	    "rowCallback": function( row, data, index ) {
+	    	var priority_html = $("#priority_template").html();
+	    	$('td.priority', row).html(priority_html);
+	    	$('td.priority', row).find(".priority_sel").val(data["priority"]);
+	    	
+	    	var button_html = $("#todo_button_template").html();
+	    	$('td.action', row).html(button_html);
+	    },
+	});
 	
-	/*"ajax": {
-		"url": "/rest/account/tablelist",
-		"type": "GET",
-		"data": function ( data ) {
-			data.col_len = data.columns.length;
-			data.ord_col_len = data.order.length;
-			return data;
-         },
-     },
-    */
-     "rowId": 'id',
-     "order": [[ 0, "desc" ]],
-     "columns": dataTableColumn,
-    "DT_RowId" : "id",
-    "rowCallback": function( row, data, index ) {
-    	var priority_html = $("#priority_template").html();
-    	$('td.priority', row).html(priority_html);
-    	$('td.priority', row).find(".priority_sel").val(data["priority"]);
-    	
-    	var button_html = $("#todo_button_template").html();
-    	$('td.action', row).html(button_html);
-    },
-});
-
-
-var listTableDone = $('#listTableDone').DataTable({
-	"processing": true,
-	"serverSide": false,
-	"dom": "rtip",
 	
-/*	"ajax": {
-		"url": "/rest/account/tablelist",
-		"type": "GET",
-		"data": function ( data ) {
-			data.col_len = data.columns.length;
-			data.ord_col_len = data.order.length;
-			return data;
-         },
-     },
-*/
-	"rowId": 'id',
-    "order": [[ 0, "desc" ]],
-    "columns":dataTableColumn,
-   "DT_RowId" : "id",
-   "rowCallback": function( row, data, index ) {
-	    var priority_html = $("#priority_template").html();
-	   	$('td.priority', row).html(priority_html);
-   		$('td.priority', row).find(".priority_sel").val(data["priority"]);
-   	
-   		var button_html = $("#done_button_template").html();
-   		$('td.action', row).html(button_html);
-   },
-});
+	listTableDone = $('#listTableDone').DataTable({
+		"processing": true,
+		"serverSide": false,
+		"dom": "rtip",
+		"rowId": 'id',
+	    "order": [[ 0, "desc" ]],
+	    "columns":dataTableColumn,
+	   "DT_RowId" : "id",
+	   "rowCallback": function( row, data, index ) {
+		    var priority_html = $("#priority_template").html();
+		   	$('td.priority', row).html(priority_html);
+	   		$('td.priority', row).find(".priority_sel").val(data["priority"]);
+	   	
+	   		var button_html = $("#done_button_template").html();
+	   		$('td.action', row).html(button_html);
+	   },
+	});
+}
+
+//// 데이터로딩
+function initData(data){
+	var groupItemList = _.groupBy(data, "done");
+	var todoItemList = [], doneItemList = [];
+	if( groupItemList[false] ){
+		todoItemList = groupItemList[false];
+	}
+	if( groupItemList[true] ){
+		doneItemList = groupItemList[true];
+	}
+	
+	var index = 0;
+	for(index = 0; index < todoItemList.length; index++ ){
+		var item = todoItemList[index];
+		listTableTodo.row.add({
+			id : item["id"] , priority : item["priority"] , text : item["text"], create_time : item["create_time"], done : false
+		}).draw( false );
+	}
+	
+	index = 0;
+	for(index = 0; index < doneItemList.length; index++ ){
+		var item = doneItemList[index];
+		listTableDone.row.add({
+			id : item["id"] , priority : item["priority"] , text : item["text"], create_time : item["create_time"], done : true
+		}).draw( false );
+	}
+}
+
+//// 페이지 로딩시
+function initPage(){
+	$.request("GET", "/rest/todo/", { } , function(success, httpStatus, data){
+		initTable();
+		initData(data.results);
+	})
+}
+initPage();
 
 </script>
  {% endblock %}
