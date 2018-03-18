@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Todo List{% endblock %}
+{% block title %}Todo Admin List{% endblock %}
 
 {% block head %}
 <!-- <link rel="stylesheet" type="text/css" href="/static/css/buttons.dataTables.min.css"> -->
@@ -12,13 +12,13 @@
 <div class="app-title">
 	<div>
 		<h1>
-			<i class="fa fa-th-list"></i> todo list
+			<i class="fa fa-th-list"></i> todo admin list
 		</h1>
-		<p>todo list</p>
+		<p>todo admin list</p>
 	</div>
 	<ul class="app-breadcrumb breadcrumb side">
 		<li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
-		<li class="breadcrumb-item">todo list</li>
+		<li class="breadcrumb-item">todo admin list</li>
 	</ul>
 </div>
 
@@ -27,56 +27,7 @@
 	<div class="col-md-12">
 		<div class="tile">
 			<div class="tile-body">
-				<form class="form-horizontal" id="todoForm1">
-					<div class="form-group row">
-						<div class="col-md-2 col-sm-2">
-						</div>
-						<div class="col-md-3 col-sm-3 col-3">
-							<button class="btn btn-warning" type="button" onclick="saveItem();">Save</button>
-						</div>
-						<div class="col-md-3 col-sm-3 col-4">
-							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                				<button class="btn btn-primary" type="button">Export</button>
-                				<div class="btn-group" role="group">
-                  					<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-	                  				<div class="dropdown-menu dropdown-menu-right">
-	                  					<a class="dropdown-item" onclick="exportList('excel');">Excel</a>
-	                  					<a class="dropdown-item" onclick="exportList('csv');">CSV</a>
-	                  					<a class="dropdown-item" onclick="exportList('json');">JSON</a>
-	                  				</div>
-              					</div>
-              				</div>
-						</div>
-						
-						<div class="col-md-3 col-sm-3 col-4">
-							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                				<button class="btn btn-primary" type="button"  data-toggle="modal" data-target="#fileImportModal">Import</button>
-              				</div>
-						</div>
-						
-					</div>
-				</form>
-				<br/>
-				
-				<form class="form-horizontal" id="todoForm">
-					<div class="form-group row">
-						<div class="col-md-2">
-							<button class="btn btn-primary btn-outline-primary icon-btn"  type="submit"><i class="fa fa-plus"></i>Add</button>
-						</div>
-						<div class="col-md-10">
-							<input class="form-control" type="text"  name="text" required placeholder="할 일을 입력하세요.">
-						</div>
-                	</div>
-                </form>
-				
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-md-6">
-		<div class="tile">
+				<div class="tile">
 			<h3 class="tile-title">할 일</h3>
 	            <div class="tile-body">
 	            	<table class="table table-hover" id="listTableTodo" data-table-index="1">
@@ -99,10 +50,8 @@
 	            </div>
 	            
 	    </div>
-	</div>
-	
-	<div class="col-md-6">
-		<div class="tile">
+	    
+	    <div class="tile">
 			<h3 class="tile-title">완료된 할 일</h3>
 	            <div class="tile-body">
 	            	<table class="table table-hover" id="listTableDone" data-table-index="2">
@@ -125,41 +74,13 @@
 	            </div>
 	            
 	    </div>
-	</div>
-</div>
-
-
-
-<!-- Modal -->
-<div class="modal fade" id="fileImportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">Data Import</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			
-			<div class="modal-body">
-				<div class="form-group row">
-					<label class="control-label col-md-3">Import File</label>
-					<div class="col-md-8">
-						<form id="importDataForm" class="form-horizontal">
-							<input class="form-control"  name="importfile" type="file">
-						</form>
-					</div>
-				</div>
-			</div>
-			
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				<button class="btn btn-primary" onclick="importData();">Import</button>
+	    
+	    
+				
 			</div>
 		</div>
 	</div>
 </div>
-
 
 
 
@@ -275,7 +196,7 @@ function getItemList(){
 
 
 function saveItem(){
-	var jsonDataList = getItemList();
+	var jsonDataList = getItemList;
 	$.request("POST", "/rest/todo/save/", { jsonData : JSON.stringify(jsonDataList)} , function(success, httpStatus, data){
         if(!success){
             if(data["message"]){

@@ -5,10 +5,10 @@ from django.template.response import TemplateResponse
 from todolist.ErrClass import ErrClass
 from rest_framework import viewsets
 from todos.models import Todo
-from todos.serializers import TodoSerializer
+from todos.serializers import TodoSerializer, AdminTodoSerializer
 from rest_framework.permissions import IsAuthenticated
 import django_filters
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.decorators import list_route
 import json
 from django.http.response import HttpResponse
@@ -18,6 +18,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 import mimetypes
 import io
 from openpyxl.reader.excel import load_workbook
+import datetime
 
 
 logger = logging.getLogger('django_log')
@@ -31,7 +32,6 @@ class TodoViewSet(viewsets.ModelViewSet):
     queryset = Todo.objects.all()  #pylint: disable=no-member
     serializer_class = TodoSerializer
     
-    ## admin 만 이 기능 사용가능
     permission_classes = (IsAuthenticated  ,)
     
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
@@ -53,8 +53,12 @@ class TodoViewSet(viewsets.ModelViewSet):
             jsonDataString = request.POST.get("jsonData")
             jsonDataList = json.loads(jsonDataString)
             josnDataDict = {}  ## id 를 key  로,  나머지 데이터를 value 로하는 dict
+            index = 2**32
             for item in jsonDataList:
                 _id = item["id"]
+                if _id == "": ## 새로 추가 되는 아이템인 경우 id 가 0일 수 있는데, 이 경우 임의의 id를 부여
+                    item["id"] = _id = index
+                    index +=1
                 josnDataDict[_id] = item
             jsonDataSet = set(josnDataDict.keys())
             
@@ -70,7 +74,8 @@ class TodoViewSet(viewsets.ModelViewSet):
             itemToAdd = jsonDataSet - objectsSet
             for _id in itemToAdd:
                 item = josnDataDict[_id]
-                todo = Todo(user = request.user, priority = item["priority"], text = item["text"],  done = item["done"], create_time = item["create_time"])
+                create_time = datetime.datetime.fromtimestamp(item["create_time"]/1000)
+                todo = Todo(user = request.user, priority = item["priority"], text = item["text"],  done = item["done"], create_time = create_time)
                 todo.save()
             
             ## objects에만 존재 데이터 삭제
@@ -94,11 +99,25 @@ class TodoViewSet(viewsets.ModelViewSet):
             return ErrClass('UNKNWON_ERROR').response()
         
    
+   
+class AdminTodoViewSet(viewsets.ModelViewSet):
+    """
+    Account Model 을 Restful API 로 관리 하는 ViewSet
+    """
+    
+    queryset = Todo.objects.all()  #pylint: disable=no-member
+    serializer_class = AdminTodoSerializer
+    
+    ## admin 만 이 기능 사용가능
+    permission_classes = (IsAuthenticated  ,)
+    
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_fields  = ( 'id', 'priority', 'user' )
 
 @login_required
-def _list(request):
+def commonlist(request):
     try: 
-        logger.info("/todos/list")
+        logger.info("/todos/commonlist")
         c = {}
         c.update(csrf(request))
         response = TemplateResponse(request, 'todos/list.html', c )
@@ -108,7 +127,34 @@ def _list(request):
     except Exception as e:
         logger.error(traceback.format_exc() )
         return ErrClass('UNKNWON_ERROR').response()
+
+@login_required
+def dayofweeklist(request):
+    try: 
+        logger.info("/todos/dayofweeklist")
+        c = {}
+        c.update(csrf(request))
+        response = TemplateResponse(request, 'todos/dayofweeklist.html', c )
+        response.render()
+        return response
     
+    except Exception as e:
+        logger.error(traceback.format_exc() )
+        return ErrClass('UNKNWON_ERROR').response()
+
+@user_passes_test(lambda u: u.is_superuser)
+def adminlist(request):
+    try: 
+        logger.info("/todos/adminlist")
+        c = {}
+        c.update(csrf(request))
+        response = TemplateResponse(request, 'todos/adminlist.html', c )
+        response.render()
+        return response
+    
+    except Exception as e:
+        logger.error(traceback.format_exc() )
+        return ErrClass('UNKNWON_ERROR').response()  
     
 @login_required
 def exportData(request):

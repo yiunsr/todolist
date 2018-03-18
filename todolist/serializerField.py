@@ -14,7 +14,7 @@ class DateTimeTzLocalField(serializers.DateTimeField):
         # 2017-12-31 10:00:00 형태
         if isinstance( value, datetime.datetime):
             if self.format == "unixtimestamp":
-                return int(value.replace(tzinfo=timezone.utc).timestamp())
+                return int(value.replace(tzinfo=timezone.utc).timestamp()) * 1000
             else:
                 value = timezone.localtime(value)
                 return value.strftime(self.format)

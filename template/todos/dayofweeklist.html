@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}요일별 Todo list{% endblock %}
+
+{% block head %}
+<!-- <link rel="stylesheet" type="text/css" href="/static/css/buttons.dataTables.min.css"> -->
+<link rel="stylesheet" type="text/css" href="/static/css/select.dataTables.min.css">
+<style>
+.day_table_box{    -webkit-box-flex: 0;
+    -ms-flex: 0 0 14.285714285714286%;
+    flex: 0 0 14.285714285714286%;
+    max-width: 14.285714285714286%;
+}
+th{    text-align: center;}
+tr.done td{text-decoration: line-through; text-color:red;}
+</style> 
+{% endblock %}
+
+{% block content %}
+
+<div class="app-title">
+	<div>
+		<h1>
+			<i class="fa fa-th-list"></i> 요일별 Todo list
+		</h1>
+		<p>todo admin list</p>
+	</div>
+	<ul class="app-breadcrumb breadcrumb side">
+		<li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+		<li class="breadcrumb-item">요일별 Todo list</li>
+	</ul>
+</div>
+
+
+
+<div class="tile">
+	<div class="row">
+		<div class="day_table_box">
+			<table class="table table-hover" id="listTable0" data-table-index="0">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>일</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    
+	    <div class="day_table_box">
+			<table class="table table-hover" id="listTable1" data-table-index="1">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>월</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	     <div class="day_table_box">
+			<table class="table table-hover" id="listTable2" data-table-index="2">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>화</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    <div class="day_table_box">
+			<table class="table table-hover" id="listTable3" data-table-index="3">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>수</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    <div class="day_table_box">
+			<table class="table table-hover" id="listTable4" data-table-index="4">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>목</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    <div class="day_table_box">
+			<table class="table table-hover" id="listTable5" data-table-index="5">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>금</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    <div class="day_table_box">
+			<table class="table table-hover" id="listTable6" data-table-index="6">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>토</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+						
+				</tbody>
+			</table>
+	    </div>
+	    
+	    
+	</div>
+</div>
+
+
+
+{% endblock %}
+
+ 
+{% block script %} 
+<!-- Data table plugin-->
+<script type="text/javascript" src="/static/js/plugins/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/dataTables.bootstrap.min.js"></script>
+
+<!-- 자바스크립트 utility library(리스트, Dict 관리) -->
+<script type="text/javascript" src="/static/js/lodash.min.js"></script>
+
+<!-- ajax file upload -->
+<script type="text/javascript" src="/static/js/plugins/jquery.form.min.js"></script>
+
+
+
+      
+<script type="text/javascript">
+
+
+$( "#todoForm" ).submit(function( event ) {
+	event.preventDefault();
+	var param = $("#todoForm [name]").getParam();
+	this.reset();
+	// listTableTodo,  listTableDone
+	listTableTodo.row.add({
+		id : "", priority : "2", text : param["text"], create_time : Date.now(), done : false
+	}).draw( false );
+});
+
+function delItem(event, tableType ){
+	// listTableTodo, listTableDone
+	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
+	
+	// datatable.js 테이블의 row 를 삭제한다.  
+	dataTableList.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function doneItem(event, tableType ){
+	// todo 테이블의 row 를 데이터를 가져와서 done 테이블에 넣어준다. 
+	var rowData = listTableTodo.row( $(event.target).parents("tr") ).data();
+	rowData["done"] = true;
+	listTableDone.row.add(rowData).draw( false );
+	
+	// todo 테이블의 row 삭제
+	listTableTodo.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function todoItem(event, tableType ){
+	// done 테이블의 row 를 데이터를 가져와서 todo 테이블에 넣어준다. 
+	var rowData = listTableDone.row( $(event.target).parents("tr") ).data();
+	rowData["done"] = false;
+	listTableTodo.row.add(rowData).draw( false );
+	
+	// done 테이블의 row 삭제
+	listTableDone.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function priorityChange(event, tableType){
+	var tableType = parseInt($(event.target).parents("table").data("table-index"));
+	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
+	var rowData = dataTableList.row( $(event.target).parents("tr") ).data();
+	rowData["priority"] =  parseInt($(event.target).val());
+	dataTableList.row( $(event.target).parents("tr") ).data(rowData).draw();
+}
+
+//// 두 테이블에 있는 데이터를 json 으로 변환한다. 
+function getItemList(){
+	var todoItemList = listTableTodo.data();
+	var doenItemList = listTableDone.data();
+	var jsonDataList = [];
+	for(var index = 0; index < todoItemList.length ; index++){
+		jsonDataList.push( todoItemList[index]);
+	}
+	for(var index = 0; index < doenItemList.length ; index++){
+		jsonDataList.push( doenItemList[index]);
+	}
+	return jsonDataList;
+}
+
+
+function saveItem(){
+	var jsonDataList = getItemList;
+	$.request("POST", "/rest/todo/save/", { jsonData : JSON.stringify(jsonDataList)} , function(success, httpStatus, data){
+        if(!success){
+            if(data["message"]){
+                $.confirm("Login Error", data["message"]);
+            }
+            $.reload();
+        }
+        $.confirm("Save", "저장이 완료되었습니다. " );
+      });
+
+}
+
+var dataTableColumn =  [
+	{ "data": "id", "visible": false, },
+	{ "data": "create_time", "visible": false, },
+	{ "data": "priority", "visible": false, "className" : "priority"    },
+    { "data": "text", "orderable": false,  "className" : "todotext"  },
+    { "data": "done", "visible": false, },
+];
+
+var listTableTodo;
+
+var initTableArg = {
+	"pageLength": 1000,
+	"processing": true,
+	"dom": "rt",
+     "rowId": 'id',
+     "order": [[ 1, "desc" ]],
+     "columns": dataTableColumn,
+    "DT_RowId" : "id",
+    "language": {
+        "emptyTable": "",
+        "zeroRecords": ""
+    },
+    "rowCallback": function( row, data, index ) {
+    	if( data["done"]){
+    		$(row).addClass("done");	
+    	}
+    	if(data["priority"] == "1" ){
+    		$('td.todotext', row).html( '<i class="fa fa-battery-empty" aria-hidden="true"></i> ' +  data["text"]);
+    	}
+    	else if(data["priority"] == "2" ){
+    		$('td.todotext', row).html( '<i class="fa fa-battery-half" aria-hidden="true"></i> ' +  data["text"]);
+    	}
+		else if(data["priority"] == "3" ){
+			$('td.todotext', row).html( '<i class="fa fa-battery-full" aria-hidden="true"></i> ' +  data["text"]);
+    	}
+    	
+    }
+};
+
+var listTableList = {};
+function initTable(){
+	listTableList[0] = $('#listTable0').DataTable(initTableArg);
+	listTableList[1] = $('#listTable1').DataTable(initTableArg);
+	listTableList[2] = $('#listTable2').DataTable(initTableArg);
+	listTableList[3] = $('#listTable3').DataTable(initTableArg);
+	listTableList[4] = $('#listTable4').DataTable(initTableArg);
+	listTableList[5] = $('#listTable5').DataTable(initTableArg);
+	listTableList[6] = $('#listTable6').DataTable(initTableArg);
+	
+}
+
+//// 데이터로딩
+function initData(data){
+	var groupItemList = _.groupBy(data, "day_of_week");
+	var index = 0;
+	var dayofweek = 0;
+	
+	for(dayofweek = 0; dayofweek < 7 ; dayofweek ++){
+		var itemList =  groupItemList[dayofweek];
+		if(!itemList)
+			continue;
+		var listTable = listTableList[dayofweek];
+		
+		for(index = 0; index < itemList.length; index++ ){
+			var item = itemList[index];
+			listTable.row.add({
+				id : item["id"] , priority : item["priority"] , text : item["text"], create_time : item["create_time"], done :  item["done"]
+			}).draw( false );
+		}	
+	}
+}
+
+//// 페이지 로딩시
+function initPage(){
+	$.request("GET", "/rest/todo/", { } , function(success, httpStatus, data){
+		initTable();
+		initData(data.results);
+	})
+}
+initPage();
+
+
+</script>
+ {% endblock %}

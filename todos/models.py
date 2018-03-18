@@ -15,7 +15,7 @@ class Todo(models.Model):
     text = models.TextField(null=False)
     done = models.BooleanField(default=False)
     
-    create_time = models.DateTimeField(auto_now_add = True)
+    create_time = models.DateTimeField()
     modify_time = models.DateTimeField(auto_now = True, null=True)
     
     user = models.ForeignKey(User, related_name="todo_user" , on_delete=models.SET_NULL, null=True)
