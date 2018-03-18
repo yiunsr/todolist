@@ -87,12 +87,14 @@
 		<div class="tile">
 			<h3 class="tile-title">할 일</h3>
 	            <div class="tile-body">
-	            	<table class="table table-hover" id="listTableTodo">
+	            	<table class="table table-hover" id="listTableTodo" data-table-index="1">
 					<thead>
 						<tr>
 							<th></th>
 							<th></th>
+							<th></th>
 							<th>작업</th>
+							<th></th>
 							<th></th>
 						</tr>
 					</thead>
@@ -111,12 +113,14 @@
 		<div class="tile">
 			<h3 class="tile-title">완료된 할 일</h3>
 	            <div class="tile-body">
-	            	<table class="table table-hover table-bordered" id="listTableDone">
+	            	<table class="table table-hover" id="listTableDone" data-table-index="2">
 					<thead>
 						<tr>
 							<th></th>
-							<th>우선순위</th>
+							<th></th>
+							<th></th>
 							<th>작업</th>
+							<th></th>
 							<th></th>
 						</tr>
 					</thead>
@@ -151,8 +155,19 @@
 <!--  체크박스 구현기능 -->
 <!-- <script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>  -->
 
+
+<!--  우선순위 옵션 -->
+<script id="priority_template"  type="text/template"> 
+<select class="form-control priority_sel" onchange="priorityChange(event);">
+	<option value="3">높음</option>
+	<option value="2">보통</option>
+	<option value="1">낮음</option>
+</select>
+</script>
+
+
 <!--  화면이 좁아서 아래 화살표형 버튼 구현 -->
-<script id="button_template"  type="text/template"> 
+<script id="todo_button_template"  type="text/template"> 
 <div class="btn-group" role="group">
 	<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
 	<div class="dropdown-menu dropdown-menu-right">
@@ -161,8 +176,21 @@
 	</div>
 </div>
 </script>
+
+<!--  화면이 좁아서 아래 화살표형 버튼 구현 -->
+<script id="done_button_template"  type="text/template"> 
+<div class="btn-group" role="group">
+	<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+	<div class="dropdown-menu dropdown-menu-right">
+		<button class="dropdown-item" onclick="todoItem(event, 2);">Todo</button>
+		<button class="dropdown-item" onclick="delItem(event, 2);">삭제</button>
+	</div>
+</div>
+</script>
       
 <script type="text/javascript">
+var id_index = 4294967296; // 2**32
+
 
 $( "#todoForm" ).submit(function( event ) {
 	event.preventDefault();
@@ -170,10 +198,55 @@ $( "#todoForm" ).submit(function( event ) {
 	this.reset();
 	// listTableTodo,  listTableDone
 	listTableTodo.row.add({
-		id : 100000, priority : "2", text : param["text"]
+		id : id_index, priority : "2", text : param["text"], create_time : Date.now(), done : 0
 	}).draw( false );
-	
+	id_index += 1;
 });
+
+function delItem(event, tableType ){
+	// listTableTodo, listTableDone
+	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
+	
+	// datatable.js 테이블의 row 를 삭제한다.  
+	dataTableList.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function doneItem(event, tableType ){
+	// todo 테이블의 row 를 데이터를 가져와서 done 테이블에 넣어준다. 
+	var rowData = listTableTodo.row( $(event.target).parents("tr") ).data();
+	rowData["done"] = 1;
+	listTableDone.row.add(rowData).draw( false );
+	
+	// todo 테이블의 row 삭제
+	listTableTodo.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function todoItem(event, tableType ){
+	// done 테이블의 row 를 데이터를 가져와서 todo 테이블에 넣어준다. 
+	var rowData = listTableDone.row( $(event.target).parents("tr") ).data();
+	rowData["done"] = 0;
+	listTableTodo.row.add(rowData).draw( false );
+	
+	// done 테이블의 row 삭제
+	listTableDone.row( $(event.target).parents("tr") ).remove().draw();
+}
+
+function priorityChange(event, tableType){
+	var tableType = parseInt($(event.target).parents("table").data("table-index"));
+	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
+	var rowData = dataTableList.row( $(event.target).parents("tr") ).data();
+	rowData["priority"] =  parseInt($(event.target).val());
+	dataTableList.row( $(event.target).parents("tr") ).data(rowData).draw();
+}
+
+var dataTableColumn =  [
+	{ "data": "id", "visible": false, },
+	{ "data": "create_time", "visible": false, },
+	{ "data": "priority", "width": "80px", "orderable": false, "className" : "priority"    },
+    { "data": "text", "orderable": false,  "className" : "todotext"  },
+    { "data": "done", "visible": false, },
+    { "data": "id", "className" : "action" , "orderable": false, },
+];
 
 var listTableTodo = $('#listTableTodo').DataTable({
 	"processing": true,
@@ -192,18 +265,14 @@ var listTableTodo = $('#listTableTodo').DataTable({
     */
      "rowId": 'id',
      "order": [[ 0, "desc" ]],
-     "columns": [
-    	{ "data": "id", "visible": false, },
-    	{ "data": "priority", "width": "80px", "orderable": false, "className" : "priority"    },
-        { "data": "text", "orderable": false, },
-        { "data": "id", "className" : "action" , "orderable": false, },
-	],
+     "columns": dataTableColumn,
     "DT_RowId" : "id",
     "rowCallback": function( row, data, index ) {
-    	$('td.priority', row).html('<select class="form-control priority_sel"><option value="1">낮음</option><option value="2">보통</option><option value="3">높음</option></select>' );
+    	var priority_html = $("#priority_template").html();
+    	$('td.priority', row).html(priority_html);
     	$('td.priority', row).find(".priority_sel").val(data["priority"]);
     	
-    	var button_html = $("#button_template").html();
+    	var button_html = $("#todo_button_template").html();
     	$('td.action', row).html(button_html);
     },
 });
@@ -224,19 +293,18 @@ var listTableDone = $('#listTableDone').DataTable({
          },
      },
 */
-     "rowId": 'id',
-     "order": [[ 0, "desc" ]],
-     "columns": [
-     	{ "data": "id", "visible": false, },
-     	{ "data": "priority", "width": "80px", "orderable": false,   },
-        { "data": "text" },
-        { "data": "id" },
- 	],
-    "DT_RowId" : "id",
-    "rowCallback": function( row, data, index ) {
-    	//// 체크박스가 표시 될 수 있도록 화면을 비운다. 
-        //$('td:eq(0)', row).html('');
-    },
+	"rowId": 'id',
+    "order": [[ 0, "desc" ]],
+    "columns":dataTableColumn,
+   "DT_RowId" : "id",
+   "rowCallback": function( row, data, index ) {
+	    var priority_html = $("#priority_template").html();
+	   	$('td.priority', row).html(priority_html);
+   		$('td.priority', row).find(".priority_sel").val(data["priority"]);
+   	
+   		var button_html = $("#done_button_template").html();
+   		$('td.action', row).html(button_html);
+   },
 });
 
 </script>
