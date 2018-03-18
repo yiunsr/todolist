@@ -142,11 +142,12 @@
         var param = $(".login-form [name]").getParam();
         $.request("POST", "/account/login", param, function(success, httpStatus, data){
               if(!success){
-                  if(httpStatus == 401){
-                      jQuery.confirm("Login Error", "이메일 또는 패스워드가 맞지 않습니다. ")
+                  if(data["message"]){
+                      jQuery.confirm("Login Error", data["message"]);
                   }
-                  $.move("/todo/list");
+                  return;
               }
+              $.move("/todo/list");
                 
             });
 	});

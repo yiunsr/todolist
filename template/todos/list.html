@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}유저리스트{% endblock %}
+{% block title %}Todo List{% endblock %}
 
 {% block head %}
 <!-- <link rel="stylesheet" type="text/css" href="/static/css/buttons.dataTables.min.css"> -->
@@ -21,74 +21,123 @@
 		<li class="breadcrumb-item">todo list</li>
 	</ul>
 </div>
+
+
 <div class="row">
 	<div class="col-md-12">
 		<div class="tile">
 			<div class="tile-body">
-				<table class="table table-hover table-bordered" id="listTable">
+				<form class="form-horizontal" id="todoForm1">
+					<div class="form-group row">
+						<div class="col-md-2 col-sm-2">
+						</div>
+						<div class="col-md-3 col-sm-3 col-3">
+							<button class="btn btn-warning" type="button">Save</button>
+						</div>
+						<div class="col-md-3 col-sm-3 col-4">
+							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                				<button class="btn btn-primary" type="button">Export</button>
+                				<div class="btn-group" role="group">
+                  					<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+	                  				<div class="dropdown-menu dropdown-menu-right">
+	                  					<button class="dropdown-item">Excel</button>
+	                  					<button class="dropdown-item">CSV</button>
+	                  					<button class="dropdown-item">JSON</button>
+	                  				</div>
+              					</div>
+              				</div>
+						</div>
+						
+						<div class="col-md-3 col-sm-3 col-4">
+							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                				<button class="btn btn-primary" type="button">Import</button>
+                				<div class="btn-group" role="group">
+                  					<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+	                  				<div class="dropdown-menu dropdown-menu-right">
+	                  					<button class="dropdown-item">Excel</button>
+	                  					<button class="dropdown-item">CSV</button>
+	                  					<button class="dropdown-item">JSON</button>
+	                  				</div>
+              					</div>
+              				</div>
+						</div>
+						
+					</div>
+				</form>
+				<br/>
+				
+				<form class="form-horizontal" id="todoForm">
+					<div class="form-group row">
+						<div class="col-md-2">
+							<button class="btn btn-primary btn-outline-primary icon-btn"  type="submit"><i class="fa fa-plus"></i>Add</button>
+						</div>
+						<div class="col-md-10">
+							<input class="form-control" type="text"  name="text" required placeholder="할 일을 입력하세요.">
+						</div>
+                	</div>
+                </form>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="tile">
+			<h3 class="tile-title">할 일</h3>
+	            <div class="tile-body">
+	            	<table class="table table-hover" id="listTableTodo">
 					<thead>
 						<tr>
 							<th></th>
-							<th>id</th>
-							<th>email</th>
-							<th>가입일</th>
-							<th>마지막로그인</th>
+							<th></th>
+							<th>작업</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						
 					</tbody>
 				</table>
-			</div>
-		</div>
+	            	
+	            	
+	            </div>
+	            
+	    </div>
+	</div>
+	
+	<div class="col-md-6">
+		<div class="tile">
+			<h3 class="tile-title">완료된 할 일</h3>
+	            <div class="tile-body">
+	            	<table class="table table-hover table-bordered" id="listTableDone">
+					<thead>
+						<tr>
+							<th></th>
+							<th>우선순위</th>
+							<th>작업</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						
+					</tbody>
+				</table>
+	            	
+	            	
+	            </div>
+	            
+	    </div>
 	</div>
 </div>
 
 
-<!-- Modal -->
-<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<form id="userAddForm" class="form-horizontal">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLongTitle">사용자 추가</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-	      		</div>
-	      		
-	      		<div class="modal-body">
-					<div class="form-group row">
-						<label class="control-label col-md-3">email</label>
-						<div class="col-md-8">
-							<input class="form-control" type="email" name="email" required placeholder=""email"">
-						</div>
-					</div>
-					
-					<div class="form-group row">
-						<label class="control-label col-md-3">password</label>
-						<div class="col-md-8">
-							<input class="form-control" type="password" name="password"  required placeholder=""password"">
-						</div>
-					</div>
-					
-					<div class="form-group row">
-						<label class="control-label col-md-3">repassword</label>
-						<div class="col-md-8">
-							<input class="form-control" type="password" name="repassword"  required placeholder=""repassword"">
-						</div>
-					</div>
-					
-      			</div>
-      		
-	      		<div class="modal-footer">
-	      			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-	      			<button type="submit" class="btn btn-primary">사용자 추가</button>
-	      		</div>
-      		</form>
-      	</div>
-	</div>
-</div>
+
+
+
+
+
 
 {% endblock %}
 
@@ -98,19 +147,40 @@
 <script type="text/javascript" src="/static/js/plugins/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/js/plugins/dataTables.bootstrap.min.js"></script>
 
-<!--  사용자추가기능 같은 버튼 표시 -->
-<script type="text/javascript" src="/static/js/plugins/dataTables.buttons.min.js"></script>
 
 <!--  체크박스 구현기능 -->
-<script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>
+<!-- <script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>  -->
+
+<!--  화면이 좁아서 아래 화살표형 버튼 구현 -->
+<script id="button_template"  type="text/template"> 
+<div class="btn-group" role="group">
+	<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+	<div class="dropdown-menu dropdown-menu-right">
+		<button class="dropdown-item" onclick="doneItem(event, 1);">Done</button>
+		<button class="dropdown-item" onclick="delItem(event, 1);">삭제</button>
+	</div>
+</div>
+</script>
+      
 <script type="text/javascript">
 
-$('#listTable').DataTable({
-	"processing": true,
-	"serverSide": true,
-	"dom": "B<>lfrtip",
+$( "#todoForm" ).submit(function( event ) {
+	event.preventDefault();
+	var param = $("#todoForm [name]").getParam();
+	this.reset();
+	// listTableTodo,  listTableDone
+	listTableTodo.row.add({
+		id : 100000, priority : "2", text : param["text"]
+	}).draw( false );
 	
-	"ajax": {
+});
+
+var listTableTodo = $('#listTableTodo').DataTable({
+	"processing": true,
+	"serverSide": false,
+	"dom": "rtip",
+	
+	/*"ajax": {
 		"url": "/rest/account/tablelist",
 		"type": "GET",
 		"data": function ( data ) {
@@ -119,82 +189,54 @@ $('#listTable').DataTable({
 			return data;
          },
      },
+    */
      "rowId": 'id',
-     "order": [[ 1, "desc" ]],
+     "order": [[ 0, "desc" ]],
      "columns": [
-    	{ "data": "id", orderable: false, className: 'select-checkbox', targets:   0 },
-		{ "data": "id" },
-        { "data": "email" },
-        { "data": "date_joined" },
-        { "data": "last_login" },
+    	{ "data": "id", "visible": false, },
+    	{ "data": "priority", "width": "80px", "orderable": false, "className" : "priority"    },
+        { "data": "text", "orderable": false, },
+        { "data": "id", "className" : "action" , "orderable": false, },
 	],
-	
-	"select": {
-		style: 'multi',
-        selector: 'td:first-child'
+    "DT_RowId" : "id",
+    "rowCallback": function( row, data, index ) {
+    	$('td.priority', row).html('<select class="form-control priority_sel"><option value="1">낮음</option><option value="2">보통</option><option value="3">높음</option></select>' );
+    	$('td.priority', row).find(".priority_sel").val(data["priority"]);
+    	
+    	var button_html = $("#button_template").html();
+    	$('td.action', row).html(button_html);
     },
+});
+
+
+var listTableDone = $('#listTableDone').DataTable({
+	"processing": true,
+	"serverSide": false,
+	"dom": "rtip",
+	
+/*	"ajax": {
+		"url": "/rest/account/tablelist",
+		"type": "GET",
+		"data": function ( data ) {
+			data.col_len = data.columns.length;
+			data.ord_col_len = data.order.length;
+			return data;
+         },
+     },
+*/
+     "rowId": 'id',
+     "order": [[ 0, "desc" ]],
+     "columns": [
+     	{ "data": "id", "visible": false, },
+     	{ "data": "priority", "width": "80px", "orderable": false,   },
+        { "data": "text" },
+        { "data": "id" },
+ 	],
     "DT_RowId" : "id",
     "rowCallback": function( row, data, index ) {
     	//// 체크박스가 표시 될 수 있도록 화면을 비운다. 
-        $('td:eq(0)', row).html('');
+        //$('td:eq(0)', row).html('');
     },
-	"buttons": [
-        {
-            text: '사용자 추가',
-            action: function ( e, dt, node, config ) {
-            	$("#addUserModal").modal('show');
-                //dt.ajax.reload();
-                
-                // 사용자 추가시
-            	$( "#userAddForm" ).submit(function( event ) {
-                    event.preventDefault();
-                    
-                    var param = $("#userAddForm [name]").getParam();
-                    if(param["password"] != param["repassword"]){
-                    	$.alert("form error","password와 repassword 가 일치하지 않습니다.");
-                    	return;
-                    }
-                    
-                    $("#addUserModal").modal('hide');
-                    jQuery.request("POST", "/rest/account/", param, function(success, httpStatus, data){
-                    	if(!success){
-                    		$.alert("사용자 추가실패", data["message"]);
-                    		return; 
-                      	 }
-                        
-                      $.alert("사용자 추가", "사용자 추가를 완료했습니다.", function(){
-                    	  dt.ajax.reload();
-                      });
-                      
-                    });
-                    
-                  });
-            }
-        },
-        {
-            text: '사용자 삭제',
-            action: function ( e, dt, node, config ) {
-            	var selectedRows = dt.rows({ selected: true }).ids();
-            	if( selectedRows.length == 0 ){
-            		$.alert("사용자 삭제", "삭제할 사용자를 선택해주세요.");
-            		return;
-            	}
-            	var ids = [];
-            	for(index = 0; index < selectedRows.length; index++) {
-            		ids.push( selectedRows[index] );
-            	}
-            	jQuery.request("DELETE", "/rest/account/deletelist", {ids : ids}, function(success, httpStatus, data){
-                	if(!success){
-                		$.alert("사용자 삭제 실패", data["message"]);
-                		return; 
-                  	}
-					$.alert("사용자 삭제", "삭제완료 ", function(){
-						dt.ajax.reload();
-					});
-				});
-            }
-        }
-    ]
 });
 
 </script>
