@@ -50,15 +50,7 @@
 						
 						<div class="col-md-3 col-sm-3 col-4">
 							<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                				<button class="btn btn-primary" type="button">Import</button>
-                				<div class="btn-group" role="group">
-                  					<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-	                  				<div class="dropdown-menu dropdown-menu-right">
-	                  					<button class="dropdown-item">Excel</button>
-	                  					<button class="dropdown-item">CSV</button>
-	                  					<button class="dropdown-item">JSON</button>
-	                  				</div>
-              					</div>
+                				<button class="btn btn-primary" type="button"  data-toggle="modal" data-target="#fileImportModal">Import</button>
               				</div>
 						</div>
 						
@@ -138,7 +130,35 @@
 
 
 
-
+<!-- Modal -->
+<div class="modal fade" id="fileImportModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Data Import</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				<div class="form-group row">
+					<label class="control-label col-md-3">Import File</label>
+					<div class="col-md-8">
+						<form id="importDataForm" class="form-horizontal">
+							<input class="form-control"  name="importfile" type="file">
+						</form>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button class="btn btn-primary" onclick="importData();">Import</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
@@ -154,9 +174,8 @@
 <!-- 자바스크립트 utility library(리스트, Dict 관리) -->
 <script type="text/javascript" src="/static/js/lodash.min.js"></script>
 
-<!--  체크박스 구현기능 -->
-<!-- <script type="text/javascript" src="/static/js/plugins/dataTables.select.min.js"></script>  -->
-
+<!-- ajax file upload -->
+<script type="text/javascript" src="/static/js/plugins/jquery.form.min.js"></script>
 
 <!--  우선순위 옵션 -->
 <script id="priority_template"  type="text/template"> 
@@ -286,7 +305,7 @@ function initTable(){
 		"serverSide": false,
 		"dom": "rtip",
 	     "rowId": 'id',
-	     "order": [[ 0, "desc" ]],
+	     "order": [[ 1, "desc" ]],
 	     "columns": dataTableColumn,
 	    "DT_RowId" : "id",
 	    "rowCallback": function( row, data, index ) {
@@ -305,7 +324,7 @@ function initTable(){
 		"serverSide": false,
 		"dom": "rtip",
 		"rowId": 'id',
-	    "order": [[ 0, "desc" ]],
+	    "order": [[ 1, "desc" ]],
 	    "columns":dataTableColumn,
 	   "DT_RowId" : "id",
 	   "rowCallback": function( row, data, index ) {
@@ -382,6 +401,33 @@ function exportList(filetype){
 	form.submit();
 	
 }
+
+
+
+function importData(){
+	var form = new FormData(document.getElementById('importDataForm'));
+	
+	$.ajax({
+		url: "/todo/import", 
+		data: form, 
+		dataType: 'json', 
+		processData: false, 
+		contentType: false, 
+		type: 'POST', 
+		success: function (response) { 
+			if(!response["success"]){
+				$.alert("Import Data Error", response["message"] );
+				return;
+			}
+			initData(response.jsonData);
+			$("#fileImportModal").modal("hide");
+		},
+		error: function (jqXHR) { 
+			alert(jqXHR.responseText); 
+		}
+	});
+}
+
 
 </script>
  {% endblock %}

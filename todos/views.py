@@ -15,6 +15,9 @@ from django.http.response import HttpResponse
 import csv
 import openpyxl
 from openpyxl.writer.excel import save_virtual_workbook
+import mimetypes
+import io
+from openpyxl.reader.excel import load_workbook
 
 
 logger = logging.getLogger('django_log')
@@ -108,7 +111,7 @@ def _list(request):
     
     
 @login_required
-def export(request):
+def exportData(request):
     try:
         filetype = request.GET.get("filetype")
         jsonDataString = request.GET.get("jsonData")
@@ -139,3 +142,42 @@ def export(request):
     except Exception as e:
         logger.error(traceback.format_exc() )
         return ErrClass('UNKNWON_ERROR').response()
+    
+@login_required
+def importData(request):
+    try:
+        importfile = request.FILES["importfile"]
+        file_mime = mimetypes.guess_type(importfile.name)
+        jsonDataList = []
+        importfile.seek(0)
+        if file_mime[0] == "text/csv":
+            reader = csv.reader(io.StringIO(importfile.read().decode('utf-8')))
+            for row in reader:
+                # id, priority, text, create_time, done
+                done = row[4] == "True"
+                item = {"id":row[0], "priority":row[1], "text":row[2], "create_time":int(row[3]), "done" : done}
+                jsonDataList.append(item)
+        elif file_mime[0] =="application/vnd.ms-excel":
+            wb = load_workbook(filename=io.BytesIO(importfile.read()))
+            worksheet = wb.active
+            for row in worksheet.rows:
+                # id, priority, text, create_time, done
+                done = row[4].value
+                item = {"id":row[0].value, "priority":row[1].value, "text":row[2].value, "create_time":int(row[3].value), "done" : done}
+                jsonDataList.append(item)
+        elif file_mime[0] =="application/json":
+            jsonDataByte = importfile.read()
+            jsonDataStr = jsonDataByte.decode("utf-8") 
+            jsonDataList =  json.loads(jsonDataStr)
+        else:
+            return ErrClass('UNKNWON_ERROR').response()
+    
+        result = ErrClass('NOERROR').toDict()
+        result["jsonData"] = jsonDataList
+        return HttpResponse(json.dumps(result), content_type="application/json")
+    
+    except Exception as e:
+        logger.error(traceback.format_exc() )
+        return ErrClass('UNKNWON_ERROR').response()
+    
+    
