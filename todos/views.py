@@ -86,7 +86,7 @@ class TodoViewSet(viewsets.ModelViewSet):
                 self.get_queryset().filter( id = _id ).delete()
                 
             ## 양쪽에 다 존재하는 데이터의 done과 priority 상태 확인
-            itemToUpdateCheck = objectsSet.union(jsonDataSet)
+            itemToUpdateCheck = objectsSet.intersection(jsonDataSet)
             for _id in itemToUpdateCheck:
                 itemWeb = josnDataDict[_id]
                 itemDB = objectsDict[_id]
@@ -276,7 +276,7 @@ def importData(request):
             for row in worksheet.rows:
                 # id, priority, text, create_time, done
                 done = row[4].value
-                item = {"id":row[0].value, "priority":row[1].value, "text":row[2].value, "create_time":int(row[3].value), "done" : done}
+                item = {"id":row[0].value or "" , "priority": str(row[1].value), "text":row[2].value, "create_time":int(row[3].value), "done" : done}
                 jsonDataList.append(item)
         elif file_mime[0] =="application/json":
             jsonDataByte = importfile.read()
