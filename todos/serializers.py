@@ -25,7 +25,7 @@ class AdminTodoSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Todo
-        fields = (  'id',  'priority' , 'text' , 'done' , 'create_time' , 'user_email')
+        fields = (  'id',  'priority' , 'text' , 'done' , 'create_time' , 'user_email', "user_id")
         
     def get_user_email(self, obj):
         if obj.user:

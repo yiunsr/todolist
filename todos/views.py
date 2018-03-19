@@ -19,6 +19,7 @@ import mimetypes
 import io
 from openpyxl.reader.excel import load_workbook
 import datetime
+from util.utils import JSONResponse
 
 
 logger = logging.getLogger('django_log')
@@ -97,8 +98,6 @@ class TodoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(traceback.format_exc() )
             return ErrClass('UNKNWON_ERROR').response()
-        
-   
    
 class AdminTodoViewSet(viewsets.ModelViewSet):
     """
@@ -113,6 +112,71 @@ class AdminTodoViewSet(viewsets.ModelViewSet):
     
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields  = ( 'id', 'priority', 'user' )
+    
+    @list_route()
+    def tablelist(self, request):
+        """
+        datatable.js 와 통신하는 함수
+        """
+        #TODO : 인젝션 방지를 위해 가능한 parameter 만 검사하는 코드 필요
+        params = request.GET
+         
+        col_len = int(params.get('col_len', 0)) #전체 column 개수
+        ord_col_len = int(params.get('ord_col_len', 0)) #정렬이 필요한 column 개수(현재는 1개만 가능) 
+        start = int(params.get('start', 0)) # DB의 limit 에 해당하는 offset
+        num = int(params.get('length', 25))  # 한 번에 가져와야 하는 리스트 개수
+        week_day = params.get('extra[week_day]', "")
+        
+        column_list = []
+        search_dict = {  }
+        order_list = []
+        
+        # loop를 돌면서 column_list 정보와 필터링해야 하는 search_dict 정보를 가져온다. 
+        for index in range(col_len):
+            param_key = "columns[" +  str(index) + "][data]"
+            col_name = params.get(param_key, None) 
+            column_list.append( col_name )
+            param_key = "columns[" +  str(index) + "][search][value]"
+            search_value =  params.get(param_key, "")
+            if  search_value:
+                search_dict[col_name] = search_value
+                
+        
+    
+        # loop를 돌면서 정렬이 필요한 column 정보를 얻는다. 
+        for index in range(ord_col_len):
+            param_key = "order[" +  str(index) + "][column]"
+            col_name = column_list[int(params.get(param_key, None))]
+            order_dir_key = "order[" +  str(index) + "][dir]"
+            order_dir = params.get(order_dir_key, None)
+            if order_dir == "asc":
+                order_list.append( col_name )
+            else:
+                order_list.append( "-" + col_name )
+            
+        
+        obj_list = self.queryset
+        if len(search_dict): #filtering 해야 하는 정보가 있으면 filter
+            obj_list = obj_list.filter( **search_dict  )
+        
+        # extra 필터 정보 검색 
+        if week_day:
+            obj_list = obj_list.filter(create_time__week_day = int(week_day)  )
+        
+        obj_list = obj_list.order_by(*order_list) #데이터 정렬
+        response_list = obj_list[start:(start+num)] # list 에 대한 limit start, start+num
+        
+        serializer = self.get_serializer(response_list, many=True)
+  
+        d = {
+            "draw":params.get('draw',1),            
+            "recordsTotal": obj_list.count(),
+            "recordsFiltered": obj_list.count(), 
+            "data" : serializer.data
+        }
+         
+        return JSONResponse(self.request, d, status=200)
+    
 
 @login_required
 def commonlist(request):
