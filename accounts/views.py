@@ -143,6 +143,19 @@ class UserViewSet(viewsets.ModelViewSet):
          
         return JSONResponse(self.request, d, status=200)
 
+    @list_route()
+    def emailselectlist(self, request):
+        """
+        유저 이메일 리스팅
+        """
+        objects = self.get_queryset().all( )
+        objects_list = objects.values( "id", "email")
+        data = [] 
+        for item in objects_list:
+            data.append( item  )
+        result = ErrClass('NOERROR').toDict()
+        result["data"] = data
+        return HttpResponse(json.dumps(result), content_type="application/json")
 
 def _login(request):
     """ User login 기능 """

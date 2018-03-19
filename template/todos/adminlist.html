@@ -27,17 +27,66 @@
 	<div class="col-md-12">
 		<div class="tile">
 			<div class="tile-body">
-				<div class="tile">
-			<h3 class="tile-title">할 일</h3>
-	            <div class="tile-body">
-	            	<table class="table table-hover" id="listTableTodo" data-table-index="1">
+				<h3 class="tile-title">전체 Todo List</h3>
+			</div>
+			
+			<div class="tile-body">
+				<form class="form-horizontal">
+					<div class="form-group row">
+						<div class="col-md-4">
+							<select class="form-control" id="email_list">
+								<option value="">== email ==</option>
+								
+							</select>
+						</div>
+						
+						<div class="col-md-2">
+							<select class="form-control" id="priority_sel">
+								<option value="">priority</option>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+							</select>
+						</div>
+						
+						<div class="col-md-2">
+							<select class="form-control" id="done_sel">
+								<option value="">done</option>
+								<option value="1">true</option>
+								<option value="0">false</option>
+							</select>
+						</div>
+						
+						<div class="col-md-2">
+							<select class="form-control" id="week_day_sel">
+								<option value="">요일</option>
+								<option value="1">일</option>
+								<option value="2">월</option>
+								<option value="3">화</option>
+								<option value="4">수</option>
+								<option value="5">목</option>
+								<option value="6">금</option>
+								<option value="7">토</option>
+								
+							</select>
+						</div>
+						
+                	</div>
+                
+                
+              	</form>
+			</div>
+			
+			<div class="tile-body">
+				<table class="table table-hover" id="listTable" data-table-index="1">
 					<thead>
 						<tr>
 							<th></th>
 							<th></th>
-							<th></th>
+							<th>email</th>
+							<th>priority</th>
 							<th>작업</th>
-							<th></th>
+							<th>done</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -47,38 +96,11 @@
 				</table>
 	            	
 	            	
-	            </div>
+	           </div>
 	            
 	    </div>
-	    
-	    <div class="tile">
-			<h3 class="tile-title">완료된 할 일</h3>
-	            <div class="tile-body">
-	            	<table class="table table-hover" id="listTableDone" data-table-index="2">
-					<thead>
-						<tr>
-							<th></th>
-							<th></th>
-							<th></th>
-							<th>작업</th>
-							<th></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
-	            	
-	            	
-	            </div>
-	            
-	    </div>
-	    
 	    
 				
-			</div>
-		</div>
 	</div>
 </div>
 
@@ -94,136 +116,62 @@
 
 <!-- 자바스크립트 utility library(리스트, Dict 관리) -->
 <script type="text/javascript" src="/static/js/lodash.min.js"></script>
-
-<!-- ajax file upload -->
-<script type="text/javascript" src="/static/js/plugins/jquery.form.min.js"></script>
-
-<!--  우선순위 옵션 -->
-<script id="priority_template"  type="text/template"> 
-<select class="form-control priority_sel" onchange="priorityChange(event);">
-	<option value="3">높음</option>
-	<option value="2">보통</option>
-	<option value="1">낮음</option>
-</select>
+     
+<script  type="text/template"  id="option_list_template">
+	<option value="" >== 이메일 == </option>
+	<% _.each(  data  , function( item ){ %>
+		<option value="<%- item.id %>"><%- item.email %></option>
+	<% }); %>
 </script>
-
-
-<!--  화면이 좁아서 아래 화살표형 버튼 구현 -->
-<script id="todo_button_template"  type="text/template"> 
-<div class="btn-group" role="group">
-	<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-	<div class="dropdown-menu dropdown-menu-right">
-		<button class="dropdown-item" onclick="doneItem(event, 1);">Done</button>
-		<button class="dropdown-item" onclick="delItem(event, 1);">삭제</button>
-	</div>
-</div>
-</script>
-
-<!--  화면이 좁아서 아래 화살표형 버튼 구현 -->
-<script id="done_button_template"  type="text/template"> 
-<div class="btn-group" role="group">
-	<button class="btn btn-primary dropdown-toggle" id="btnGroupDrop1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-	<div class="dropdown-menu dropdown-menu-right">
-		<button class="dropdown-item" onclick="todoItem(event, 2);">Todo</button>
-		<button class="dropdown-item" onclick="delItem(event, 2);">삭제</button>
-	</div>
-</div>
-</script>
-      
+     
 <script type="text/javascript">
-var id_index = 4294967296; // 2**32
-
-
-$( "#todoForm" ).submit(function( event ) {
-	event.preventDefault();
-	var param = $("#todoForm [name]").getParam();
-	this.reset();
-	// listTableTodo,  listTableDone
-	listTableTodo.row.add({
-		id : "", priority : "2", text : param["text"], create_time : Date.now(), done : false
-	}).draw( false );
-});
-
-function delItem(event, tableType ){
-	// listTableTodo, listTableDone
-	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
-	
-	// datatable.js 테이블의 row 를 삭제한다.  
-	dataTableList.row( $(event.target).parents("tr") ).remove().draw();
-}
-
-function doneItem(event, tableType ){
-	// todo 테이블의 row 를 데이터를 가져와서 done 테이블에 넣어준다. 
-	var rowData = listTableTodo.row( $(event.target).parents("tr") ).data();
-	rowData["done"] = true;
-	listTableDone.row.add(rowData).draw( false );
-	
-	// todo 테이블의 row 삭제
-	listTableTodo.row( $(event.target).parents("tr") ).remove().draw();
-}
-
-function todoItem(event, tableType ){
-	// done 테이블의 row 를 데이터를 가져와서 todo 테이블에 넣어준다. 
-	var rowData = listTableDone.row( $(event.target).parents("tr") ).data();
-	rowData["done"] = false;
-	listTableTodo.row.add(rowData).draw( false );
-	
-	// done 테이블의 row 삭제
-	listTableDone.row( $(event.target).parents("tr") ).remove().draw();
-}
-
-function priorityChange(event, tableType){
-	var tableType = parseInt($(event.target).parents("table").data("table-index"));
-	var dataTableList = {1 : listTableTodo, 2:  listTableDone}[tableType];
-	var rowData = dataTableList.row( $(event.target).parents("tr") ).data();
-	rowData["priority"] =  parseInt($(event.target).val());
-	dataTableList.row( $(event.target).parents("tr") ).data(rowData).draw();
-}
-
-//// 두 테이블에 있는 데이터를 json 으로 변환한다. 
-function getItemList(){
-	var todoItemList = listTableTodo.data();
-	var doenItemList = listTableDone.data();
-	var jsonDataList = [];
-	for(var index = 0; index < todoItemList.length ; index++){
-		jsonDataList.push( todoItemList[index]);
-	}
-	for(var index = 0; index < doenItemList.length ; index++){
-		jsonDataList.push( doenItemList[index]);
-	}
-	return jsonDataList;
-}
-
-
-function saveItem(){
-	var jsonDataList = getItemList;
-	$.request("POST", "/rest/todo/save/", { jsonData : JSON.stringify(jsonDataList)} , function(success, httpStatus, data){
-        if(!success){
-            if(data["message"]){
-                $.confirm("Login Error", data["message"]);
-            }
-            $.reload();
-        }
-        $.confirm("Save", "저장이 완료되었습니다. " );
-      });
-
-}
 
 var dataTableColumn =  [
 	{ "data": "id", "visible": false, },
 	{ "data": "create_time", "visible": false, },
-	{ "data": "priority", "width": "80px", "orderable": false, "className" : "priority"    },
+	{ "data": "user_email", "visible": true, "orderable": false, },
+	{ "data": "priority", "width": "80px", "className" : "priority"    },
     { "data": "text", "orderable": false,  "className" : "todotext"  },
-    { "data": "done", "visible": false, },
-    { "data": "id", "className" : "action" , "orderable": false, },
+    { "data": "done" },
+    { "data": "user_id", "visible": false, "orderable": false, },
 ];
-var listTableTodo;
-var listTableDone
-
+var listTable;
 function initTable(){
-	listTableTodo = $('#listTableTodo').DataTable({
+	listTable = $('#listTable').DataTable({
 		"processing": true,
-		"serverSide": false,
+		"serverSide": true,
+		"ajax": {
+			"url": "/rest/admintodo/tablelist/",
+			"type": "GET",
+			"data": function ( data ) {
+				data.col_len = data.columns.length;
+				data.ord_col_len = data.order.length;
+				
+				// search 전달
+				
+				if( $( "#done_sel" ).val() !="" ){
+					var done_index = _.findIndex(dataTableColumn, {data: "done"});
+					data.columns[done_index]["search"]["value"] =  $( "#done_sel" ).val();
+				}
+				if( $( "#priority_sel" ).val() !="" ){
+					var priority_index = _.findIndex(dataTableColumn, {data: "priority"});
+					data.columns[priority_index]["search"]["value"] =  $( "#priority_sel" ).val();
+				}
+				if( $( "#email_list" ).val() !="" ){
+					var user_id_index = _.findIndex(dataTableColumn, {data: "user_id"});
+					data.columns[user_id_index]["search"]["value"] =  $( "#email_list" ).val();
+				}
+				
+				data.extra = {};
+				if( $( "#week_day_sel" ).val() !="" ){
+					data.extra["week_day"] =  $( "#week_day_sel" ).val();
+				}
+				
+				
+				
+				return data;
+	         },
+	     },
 		"dom": "rtip",
 	     "rowId": 'id',
 	     "order": [[ 1, "desc" ]],
@@ -239,115 +187,37 @@ function initTable(){
 	    },
 	});
 	
-	
-	listTableDone = $('#listTableDone').DataTable({
-		"processing": true,
-		"serverSide": false,
-		"dom": "rtip",
-		"rowId": 'id',
-	    "order": [[ 1, "desc" ]],
-	    "columns":dataTableColumn,
-	   "DT_RowId" : "id",
-	   "rowCallback": function( row, data, index ) {
-		    var priority_html = $("#priority_template").html();
-		   	$('td.priority', row).html(priority_html);
-	   		$('td.priority', row).find(".priority_sel").val(data["priority"]);
-	   	
-	   		var button_html = $("#done_button_template").html();
-	   		$('td.action', row).html(button_html);
-	   },
+}
+
+function initEmailList(){
+	$.request("GET", "/rest/account/emailselectlist/", {}, function(success, httpStatus, data){
+        if(!success){
+            if(data["message"]){
+                jQuery.confirm("Error", data["message"]);
+            }
+            return;
+        }
+        
+		var template_string = $("#option_list_template").html();
+		var compiled = _.template(template_string);
+		var html = compiled({ data : data.data });
+		$("#email_list").html( html ); 
 	});
 }
 
-//// 데이터로딩
-function initData(data){
-	var groupItemList = _.groupBy(data, "done");
-	var todoItemList = [], doneItemList = [];
-	if( groupItemList[false] ){
-		todoItemList = groupItemList[false];
-	}
-	if( groupItemList[true] ){
-		doneItemList = groupItemList[true];
-	}
-	
-	var index = 0;
-	for(index = 0; index < todoItemList.length; index++ ){
-		var item = todoItemList[index];
-		listTableTodo.row.add({
-			id : item["id"] , priority : item["priority"] , text : item["text"], create_time : item["create_time"], done : false
-		}).draw( false );
-	}
-	
-	index = 0;
-	for(index = 0; index < doneItemList.length; index++ ){
-		var item = doneItemList[index];
-		listTableDone.row.add({
-			id : item["id"] , priority : item["priority"] , text : item["text"], create_time : item["create_time"], done : true
-		}).draw( false );
-	}
-}
 
 //// 페이지 로딩시
 function initPage(){
-	$.request("GET", "/rest/todo/", { } , function(success, httpStatus, data){
-		initTable();
-		initData(data.results);
-	})
+	initEmailList(); 
+	initTable();
 }
 initPage();
 
-function exportList(filetype){
-	var jsonDataList = getItemList();
-	var jsonData = JSON.stringify(jsonDataList);
-	
-	var form = document.createElement("form");
-	form.setAttribute("charset", "UTF-8");
-	form.setAttribute("method", "GET"); 
-	form.setAttribute("action", "/todo/export");
-	
-	var hiddenField1 = document.createElement("input");
-	hiddenField1.setAttribute("type", "hidden");
-	hiddenField1.setAttribute("name", "filetype");
-	hiddenField1.setAttribute("value", filetype);
-	form.appendChild(hiddenField1);
-	
-	var hiddenField2 = document.createElement("input");
-	hiddenField2.setAttribute("type", "hidden");
-	hiddenField2.setAttribute("name", "jsonData");
-	hiddenField2.setAttribute("value", jsonData);
-	form.appendChild(hiddenField2);
-	
-	document.body.appendChild(form);
 
-	form.submit();
-	
-}
+$( "#done_sel, #priority_sel, #email_list, #week_day_sel" ).change(function() {
+	listTable.draw();
+});
 
-
-
-function importData(){
-	var form = new FormData(document.getElementById('importDataForm'));
-	
-	$.ajax({
-		url: "/todo/import", 
-		data: form, 
-		dataType: 'json', 
-		processData: false, 
-		contentType: false, 
-		type: 'POST', 
-		success: function (response) { 
-			if(!response["success"]){
-				$.alert("Import Data Error", response["message"] );
-				return;
-			}
-			initData(response.jsonData);
-			$("#fileImportModal").modal("hide");
-		},
-		error: function (jqXHR) { 
-			alert(jqXHR.responseText); 
-		}
-	});
-}
 
 
 </script>

@@ -20,10 +20,11 @@ from rest_framework import routers
 
 from todolist import view
 from accounts.views import UserViewSet
-from todos.views import TodoViewSet
+from todos.views import TodoViewSet, AdminTodoViewSet
 
 router = routers.DefaultRouter()
 router.register(r'account', UserViewSet)
+router.register(r'admintodo', AdminTodoViewSet)
 router.register(r'todo', TodoViewSet)
 
 urlpatterns = [
