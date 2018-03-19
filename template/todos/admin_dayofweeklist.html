@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}요일별 Todo list{% endblock %}
+{% block title %}요일별 Todo list(Admin 용){% endblock %}
 
 {% block head %}
 <!-- <link rel="stylesheet" type="text/css" href="/static/css/buttons.dataTables.min.css"> -->
@@ -21,19 +21,49 @@ tr.done td{text-decoration: line-through; text-color:red;}
 <div class="app-title">
 	<div>
 		<h1>
-			<i class="fa fa-th-list"></i> 요일별 Todo list
+			<i class="fa fa-th-list"></i> 요일별 Todo list(Admin 용)
 		</h1>
-		<p>todo list</p>
+		<p>todo admin list</p>
 	</div>
 	<ul class="app-breadcrumb breadcrumb side">
 		<li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
-		<li class="breadcrumb-item">요일별 Todo list</li>
+		<li class="breadcrumb-item">요일별 Todo list(Admin 용)</li>
 	</ul>
 </div>
 
 
 
 <div class="tile">
+
+	<div class="tile-body">
+		<form class="form-horizontal">
+			<div class="form-group row">
+				<div class="col-md-4">
+					<select class="form-control" id="email_list">
+					<option value="">== 이메일 == </option>
+					</select>
+				</div>
+						
+				<div class="col-md-2">
+					<select class="form-control" id="priority_sel">
+						<option value="">priority</option>
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+					</select>
+				</div>
+						
+				<div class="col-md-2">
+					<select class="form-control" id="done_sel">
+						<option value="">done</option>
+						<option value="1">true</option>
+						<option value="0">false</option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+
 	<div class="row">
 		<div class="day_table_box">
 			<table class="table table-hover" id="listTable0" data-table-index="0">
@@ -49,6 +79,14 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -67,6 +105,13 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -84,6 +129,13 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -101,6 +153,13 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -118,6 +177,14 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -135,6 +202,14 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -152,6 +227,14 @@ tr.done td{text-decoration: line-through; text-color:red;}
 				<tbody>
 						
 				</tbody>
+				
+				<tfoot>
+					<td>1</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				<tfoot/>
 			</table>
 	    </div>
 	    
@@ -176,7 +259,15 @@ tr.done td{text-decoration: line-through; text-color:red;}
 <script type="text/javascript" src="/static/js/plugins/jquery.form.min.js"></script>
 
 
-
+<!-- 자바스크립트 utility library(리스트, Dict 관리) -->
+<script type="text/javascript" src="/static/js/lodash.min.js"></script>
+     
+<script  type="text/template"  id="option_list_template">
+	<option value="" >== 이메일 == </option>
+	<% _.each(  data  , function( item ){ %>
+		<option value="<%- item.id %>"><%- item.email %></option>
+	<% }); %>
+</script>
       
 <script type="text/javascript">
 
@@ -279,6 +370,26 @@ var initTableArg = {
 			$('td.todotext', row).html( '<i class="fa fa-battery-full" aria-hidden="true"></i> ' +  data["text"]);
     	}
     	
+    },
+    "footerCallback": function ( row, data, start, end, display ) {
+        var api = this.api(), data;
+        
+        var intVal = function ( i ) {
+            return typeof i === 'string' ?
+                i.replace(/[\$,]/g, '')*1 :
+                typeof i === 'number' ?
+                    i : 0;
+        };
+        var column_index = 3;
+
+        // Total count
+        var total_count = api.column( column_index).data().count();
+	
+
+        // Update footer
+        $( api.column( column_index ).footer() ).html(
+            "총 : " + total_count + " 개" 
+        );
     }
 };
 
@@ -300,10 +411,15 @@ function initData(data){
 	var index = 0;
 	var dayofweek = 0;
 	
+	
 	for(dayofweek = 0; dayofweek < 7 ; dayofweek ++){
+		listTableList[dayofweek].clear();
 		var itemList =  groupItemList[dayofweek];
-		if(!itemList)
+		if(!itemList){
+			listTableList[dayofweek].draw();
 			continue;
+		}
+			
 		var listTable = listTableList[dayofweek];
 		
 		for(index = 0; index < itemList.length; index++ ){
@@ -315,15 +431,48 @@ function initData(data){
 	}
 }
 
+function initEmailList(){
+	$.request("GET", "/rest/account/emailselectlist/", {}, function(success, httpStatus, data){
+        if(!success){
+            if(data["message"]){
+                jQuery.confirm("Error", data["message"]);
+            }
+            return;
+        }
+        
+		var template_string = $("#option_list_template").html();
+		var compiled = _.template(template_string);
+		var html = compiled({ data : data.data });
+		$("#email_list").html( html ); 
+	});
+}
+
 //// 페이지 로딩시
 function initPage(){
-	$.request("GET", "/rest/todo/", { } , function(success, httpStatus, data){
-		initTable();
+	initEmailList();
+	initTable();
+	$.request("GET", "/rest/admintodo/", { } , function(success, httpStatus, data){
 		initData(data.results);
 	})
 }
 initPage();
 
+$( "#done_sel, #priority_sel, #email_list, #week_day_sel" ).change(function() {
+	var data = {};
+	if ($("#email_list").val() != ""){
+		data["user"] = $("#email_list").val();
+	}
+	if ($("#priority_sel").val() != ""){
+		data["priority"] = $("#priority_sel").val();
+	}
+	if ($("#done_sel").val() != ""){
+		data["done"] = $("#done_sel").val();
+	}
+	
+	$.request("GET", "/rest/admintodo/", data , function(success, httpStatus, data){
+		initData(data.results);
+	})
+});
 
 </script>
  {% endblock %}

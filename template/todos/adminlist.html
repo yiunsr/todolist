@@ -148,7 +148,6 @@ function initTable(){
 				data.ord_col_len = data.order.length;
 				
 				// search 전달
-				
 				if( $( "#done_sel" ).val() !="" ){
 					var done_index = _.findIndex(dataTableColumn, {data: "done"});
 					data.columns[done_index]["search"]["value"] =  $( "#done_sel" ).val();

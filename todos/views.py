@@ -6,7 +6,7 @@ from todolist.ErrClass import ErrClass
 from rest_framework import viewsets
 from todos.models import Todo
 from todos.serializers import TodoSerializer, AdminTodoSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 import django_filters
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.decorators import list_route
@@ -108,10 +108,10 @@ class AdminTodoViewSet(viewsets.ModelViewSet):
     serializer_class = AdminTodoSerializer
     
     ## admin 만 이 기능 사용가능
-    permission_classes = (IsAuthenticated  ,)
+    permission_classes = (IsAdminUser  ,)
     
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields  = ( 'id', 'priority', 'user' )
+    filter_fields  = ( 'id', 'priority', 'user' , "done")
     
     @list_route()
     def tablelist(self, request):
@@ -198,7 +198,10 @@ def dayofweeklist(request):
         logger.info("/todos/dayofweeklist")
         c = {}
         c.update(csrf(request))
-        response = TemplateResponse(request, 'todos/dayofweeklist.html', c )
+        if request.user.is_superuser:
+            response = TemplateResponse(request, 'todos/admin_dayofweeklist.html', c )
+        else:
+            response = TemplateResponse(request, 'todos/dayofweeklist.html', c )
         response.render()
         return response
     

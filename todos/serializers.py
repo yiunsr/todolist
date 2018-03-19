@@ -22,13 +22,22 @@ class TodoSerializer(serializers.HyperlinkedModelSerializer):
 class AdminTodoSerializer(serializers.HyperlinkedModelSerializer):
     create_time  = DateTimeTzLocalField(format = "unixtimestamp" , read_only = True)
     user_email = serializers.SerializerMethodField()
+    day_of_week = serializers.SerializerMethodField()
     
     class Meta:
         model = Todo
-        fields = (  'id',  'priority' , 'text' , 'done' , 'create_time' , 'user_email', "user_id")
+        fields = (  'id',  'priority' , 'text' , 'done' , 'create_time' , 'user_email', "user_id", "day_of_week" )
         
     def get_user_email(self, obj):
         if obj.user:
             return   obj.user.email
         else:
             return ""
+        
+    def get_day_of_week(self, obj):
+        if obj.create_time:
+            value = timezone.localtime(obj.create_time)
+            return value.strftime("%w")
+        else:
+            return ""
+    
