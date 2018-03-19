@@ -7,7 +7,7 @@ if SERVER_AUTO:
     SERVER_TYPE = os.environ.get('S_TYPE')
     
 if SERVER_TYPE == None or SERVER_AUTO ==False:
-    SERVER_TYPE = "LOCAL"   ## AUTO, LOCAL,  STAGING,  REAL,  UNITTEST
+    SERVER_TYPE = "REALTEST"   ## AUTO, LOCAL,  STAGING,  REAL,  UNITTEST
 
   
 if SERVER_TYPE == "LOCAL" :
@@ -22,6 +22,13 @@ elif SERVER_TYPE == "UNITTEST" :
     DB_USER = "todouser"
     DB_PASSWORD = "Todo-0316_18"
     DB_HOST = "localhost"
+    DB_PORT = 3306
+    
+elif SERVER_TYPE == "REALTEST":
+    DB_NAME = "todo"
+    DB_USER = "todouser"
+    DB_PASSWORD = "Todo-0316_18"
+    DB_HOST = "163.44.171.61"
     DB_PORT = 3306
     
 elif SERVER_TYPE == "REAL":
